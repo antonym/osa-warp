@@ -281,6 +281,6 @@
   tasks:
     - name: Set lock file
       file:
-        path: /etc/openstack_deploy/pike_migrate.complete
+        path: /etc/openstack_deploy/osa-warp/pike_migrate.complete
         state: touch
         mode: 0644

@@ -224,6 +224,7 @@ function regen_repo_containers {
 
 function run_upgrade {
   pushd /opt/openstack-ansible
+    cp /opt/osa-warp/releases/${TARGET}/run-upgrade.sh /opt/openstack-ansible/scripts/run-upgrade.sh
     export TERM=linux
     export I_REALLY_KNOW_WHAT_I_AM_DOING=true
     export SETUP_ARA=true

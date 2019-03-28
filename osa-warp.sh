@@ -22,6 +22,11 @@ source lib/vars.sh
 discover_code_version
 require_ubuntu_version 16
 
+# create working directory if it doesn't exist
+if [ ! -d /etc/openstack_deploy/osa-warp ]; then
+  mkdir -p /etc/openstack_deploy/osa-warp
+fi
+
 # if target not set, exit and inform user how to proceed
 if [[ -z "$1" ]]; then
   echo "Please set the target to upgrade to:"
@@ -77,9 +82,12 @@ for RELEASE_TO_DO in ${TODO}; do
   if [[ ${RELEASE_TO_DO} != ${TARGET} ]]; then
     checkout_release ${RELEASE_TO_DO}
     config_migration ${RELEASE_TO_DO}
-    pushd /opt/osa-warp/releases/pike/upgrade-utilities/playbooks
-      openstack-ansible db-migration-${RELEASE_TO_DO}.yml
-    popd
+    if [ ! -f /etc/openstack_deploy/osa-warp/${RELEASE_TO_DO}_migrate.complete ]; then
+      pushd /opt/osa-warp/playbooks
+        openstack-ansible remove-apt-proxy.yml
+        openstack-ansible db-migration-${RELEASE_TO_DO}.yml
+      popd
+    fi
   fi
 done
 

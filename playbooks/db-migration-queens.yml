@@ -272,6 +272,6 @@
   tasks:
     - name: Set lock file
       file:
-        path: /etc/openstack_deploy/queens_migrate.complete
+        path: /etc/openstack_deploy/osa-warp/queens_migrate.complete
         state: touch
         mode: 0644
