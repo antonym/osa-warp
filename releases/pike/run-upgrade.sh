@@ -175,11 +175,12 @@ function main {
         RUN_TASKS+=("setup-hosts.yml --limit '!galera_all'")
         # add new container config to galera containers but don't restart
         RUN_TASKS+=("lxc-containers-create.yml -e 'lxc_container_allow_restarts=false' --limit galera_all")
+        RUN_TASKS+=("/opt/osa-warp/playbooks/lxc-containers-restart.yml --limit '!galera_all'")
         RUN_TASKS+=("haproxy-install.yml")
 	# rebuild the repo servers
         RUN_TASKS+=("repo-install.yml")
         # stop mariadb on all nodes except first for quorum reset
-        RUN_TASKS+=("${UPGRADE_PLAYBOOKS}/mariadb-shutdown.yml")
+        RUN_TASKS+=("/opt/osa-warp/playbooks/mariadb-shutdown.yml")
         # explicitly perform mariadb upgrade
         RUN_TASKS+=("galera-install.yml -e 'galera_upgrade=true'")
         # explicitly perform controlled galera cluster restart

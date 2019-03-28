@@ -177,11 +177,14 @@ function main {
         RUN_TASKS+=("setup-hosts.yml --limit '!galera_all:!rabbitmq_all'")
         # add new container config to containers but don't restart
         RUN_TASKS+=("lxc-containers-create.yml -e 'lxc_container_allow_restarts=false' --limit 'galera_all:rabbitmq_all'")
+        RUN_TASKS+=("/opt/osa-warp/playbooks/lxc-containers-restart.yml --limit '!galera_all'")
         # setup infra
         RUN_TASKS+=("unbound-install.yml")
         RUN_TASKS+=("repo-install.yml")
         RUN_TASKS+=("haproxy-install.yml")
         RUN_TASKS+=("repo-use.yml")
+        # stop mariadb on all nodes except first for quorum reset
+        RUN_TASKS+=("/opt/osa-warp/playbooks/mariadb-shutdown.yml")
         # explicitly perform mariadb upgrade
         RUN_TASKS+=("galera-install.yml -e 'galera_upgrade=true'")
         # explicitly perform controlled galera cluster restart
@@ -193,6 +196,7 @@ function main {
         RUN_TASKS+=("utility-install.yml")
         RUN_TASKS+=("rsyslog-install.yml")
         RUN_TASKS+=("${UPGRADE_PLAYBOOKS}/memcached-flush.yml")
+        RUN_TASKS+=("/opt/osa-warp/playbooks/neutron-tmp-inventory.yml")
         RUN_TASKS+=("setup-openstack.yml")
         # Run the tasks in order
         for item in ${!RUN_TASKS[@]}; do

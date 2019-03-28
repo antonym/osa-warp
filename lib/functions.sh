@@ -39,6 +39,14 @@ function discover_code_version {
            export CODE_UPGRADE_FROM="queens"
            echo "You seem to be running Queens"
         ;;
+        *18|rocky)
+           export CODE_UPGRADE_FROM="rocky"
+           echo "You seem to be running Rocky"
+        ;;
+        *19|stein)
+           export CODE_UPGRADE_FROM="stein"
+           echo "You seem to be running Stein"
+        ;;
         *)
            echo "Unable to detect current OpenStack version, failing...."
            exit 99
@@ -64,7 +72,7 @@ function pre_flight {
     echo -e "
     Once you start the upgrade there is no going back.
     This script will guide you through the process of
-    upgrading RPC-O from:
+    upgrading OSA from:
 
     ${CODE_UPGRADE_FROM^} to ${TARGET^}
 
@@ -104,21 +112,6 @@ function check_user_variables {
   fi
 }
 
-function checkout_openstack_ansible {
-  if [ ! -d "/opt/openstack-ansible" ]; then
-    git clone --recursive https://github.com/openstack/openstack-ansible /opt/openstack-ansible
-    pushd /opt/openstack-ansible
-      git checkout ${OSA_SHA}
-    popd
-  else
-    pushd /opt/openstack-ansible
-      git reset --hard HEAD
-      git fetch --all
-      git checkout ${OSA_SHA}
-    popd
-  fi
-}
-
 function configure_osa {
   rm -rf /etc/openstack_deploy/group_vars
   # clean out any existing env.d inventory
@@ -151,14 +144,82 @@ function disable_hardening {
 
 function set_secrets_file {
   if [ -f "/etc/openstack_deploy/user_secrets.yml" ]; then
-    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_rpco_upgrade.yml; then
-      echo 'osa_secrets_file_name: "user_secrets.yml"' >> /etc/openstack_deploy/user_rpco_upgrade.yml
+    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_osa_warp.yml; then
+      echo 'osa_secrets_file_name: "user_secrets.yml"' >> /etc/openstack_deploy/user_osa_warp.yml
     fi
   elif [ -f "/etc/openstack_deploy/user_osa_secrets.yml" ]; then
-    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_rpco_upgrade.yml; then
-      echo 'osa_secrets_file_name: "user_osa_secrets.yml"' >> /etc/openstack_deploy/user_rpco_upgrade.yml
+    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_osa_warp.yml; then
+      echo 'osa_secrets_file_name: "user_osa_secrets.yml"' >> /etc/openstack_deploy/user_osa_warp.yml
     fi
   fi
+}
+
+function power_down {
+  pushd /opt/osa-warp/playbooks
+    openstack-ansible power-down.yml
+  popd
+}
+
+function checkout_release {
+  if [ ! -d "/opt/openstack-ansible" ]; then
+    git clone --recursive https://github.com/openstack/openstack-ansible /opt/openstack-ansible
+    pushd /opt/openstack-ansible
+      git checkout stable/"${1}"
+      scripts/bootstrap-ansible.sh
+    popd
+  else
+    pushd /opt/openstack-ansible
+      git reset --hard HEAD
+      git fetch --all
+      git checkout stable/"${1}"
+      scripts/bootstrap-ansible.sh
+    popd
+  fi
+}
+
+function config_migration {
+  case "${1}" in
+    ocata)
+      pushd /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
+        openstack-ansible ansible_fact_cleanup.yml
+        openstack-ansible deploy-config-changes.yml
+        openstack-ansible user-secrets-adjustment.yml
+        openstack-ansible pip-conf-removal.yml
+      popd
+    ;;
+    pike)
+      pushd /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
+        openstack-ansible ansible_fact_cleanup.yml
+        openstack-ansible deploy-config-changes.yml
+        openstack-ansible user-secrets-adjustment.yml
+        openstack-ansible pip-conf-removal.yml
+        openstack-ansible ceph-galaxy-removal.yml
+      popd
+    ;;
+    queens)
+      pushd /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
+        openstack-ansible ansible_fact_cleanup.yml
+        openstack-ansible deploy-config-changes.yml
+        openstack-ansible user-secrets-adjustment.yml
+        openstack-ansible pip-conf-removal.yml
+        openstack-ansible ceph-galaxy-removal.yml
+      popd
+    ;;
+    rocky)
+      # run rocky configs
+    ;;
+    *)
+      echo "Unable to detect required OpenStack version, failing...."
+      exit 99
+    ;;
+  esac
+}
+
+function regen_repo_containers {
+  pushd /opt/openstack-ansible/playbooks
+    openstack-ansible lxc-containers-destroy.yml -e force_containers_destroy=true -e force_containers_data_destroy=true --limit repo_container
+    openstack-ansible lxc-containers-create.yml --limit repo-infra_all -e lxc_container_fs_size=10G
+  popd
 }
 
 function run_upgrade {
@@ -171,35 +232,29 @@ function run_upgrade {
   popd
 }
 
-function strip_install_steps {
-  pushd /opt/openstack-ansible/scripts
-    sed -i '/RUN_TASKS+=("[a-z]/d' run-upgrade.sh
-    sed -i "/memcached-flush.yml/d" run-upgrade.sh
-    sed -i "/galera-cluster-rolling-restart/d" run-upgrade.sh
-  popd
-}
-
-function prepare_ocata {
-  if [[ ! -f "/etc/openstack_deploy/ocata_upgrade_prep.complete" ]]; then
-    pushd /opt/rpc-upgrades/incremental/playbooks
-      openstack-ansible prepare-ocata-upgrade.yml
-    popd
-  fi
-}
-
-function prepare_pike {
-  pushd /opt/openstack-ansible
-    # patch in restarting of containers into run-upgrade
-    cp /opt/rpc-upgrades/playbooks/patches/pike/lxc-containers-restart.yml /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
-    cp /opt/rpc-upgrades/playbooks/patches/pike/run-upgrade.patch /opt/openstack-ansible
-    patch -p1 < run-upgrade.patch
-  popd
-}
-
-function prepare_queens {
-  echo "Queens prepare steps go here..."
-}
-
-function prepare_rocky {
-  echo "Rocky prepare steps go here..."
+function cleanup {
+  case "${1}" in
+    ocata)
+      # run ocata cleanup
+    ;;
+    pike)
+      # run pike cleanup
+    ;;
+    queens)
+      pushd /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
+        openstack-ansible cleanup-nova.yml -e force_containers_destroy=yes -e force_containers_data_destroy=yes
+        openstack-ansible cleanup-cinder.yml -e force_containers_destroy=yes -e force_containers_data_destroy=yes
+        openstack-ansible cleanup-heat.yml -e force_containers_destroy=yes -e force_containers_data_destroy=yes
+        openstack-ansible cleanup-ironic.yml -e force_containers_destroy=yes -e force_containers_data_destroy=yes
+        openstack-ansible cleanup-trove.yml -e force_containers_destroy=yes -e force_containers_data_destroy=yes
+      popd
+    ;;
+    rocky)
+      # run rocky cleaning
+    ;;
+    *)
+      echo "Unable to detect required OpenStack version, failing...."
+      exit 99
+    ;;
+  esac
 }
