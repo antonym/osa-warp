@@ -30,7 +30,7 @@
             echo '[all]' > /etc/openstack_deploy/inventory.ini.org
           fi
           echo "Copying the transitional inventory.ini for neutron into /etc/openstack_deploy"
-          cp {{ playbook_dir }}/../files/neutron-migration-inventory.ini /etc/openstack_deploy/inventory.ini
+          cp /opt/osa-warp/files/neutron-migration-inventory.ini /etc/openstack_deploy/inventory.ini
           exit 2
         fi
       args:

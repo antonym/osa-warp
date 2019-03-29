@@ -16,6 +16,7 @@
 - name: Clean various files
   hosts: all
   gather_facts: false
+  ignore_errors: true
   tasks:
     - name: Remove apt-cacher-proxy
       file:
