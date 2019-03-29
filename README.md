@@ -25,7 +25,7 @@ Stages:
 Currently supports warping more than one release across Newton, Ocata, 
 Pike, Queens to Rocky on Ubuntu 16.04
 
-    git clone osa-warp
+    git clone https://github.com/antonym/osa-warp.git /opt/osa-warp
     cd /opt/osa-warp
     ./osa-warp <target_release>
 
