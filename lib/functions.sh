@@ -134,17 +134,24 @@ function power_down {
 
 function checkout_release {
   if [ ! -d "/opt/openstack-ansible" ]; then
-    git clone --recursive https://github.com/openstack/openstack-ansible /opt/openstack-ansible
+    git clone --recursive ${OSA_REPO} /opt/openstack-ansible
     pushd /opt/openstack-ansible
       git checkout stable/"${1}"
     popd
   else
     pushd /opt/openstack-ansible
+      git remote set-url origin ${OSA_REPO}
       git reset --hard HEAD
       git fetch --all
       git checkout stable/"${1}"
     popd
   fi
+}
+
+function bootstrap_ansible {
+  pushd /opt/openstack-ansible
+    scripts/bootstrap-ansible.sh
+  popd  
 }
 
 function config_migration {
