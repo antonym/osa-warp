@@ -23,3 +23,4 @@ RELEASES="newton
 
 STARTING_RELEASE=false
 SKIP_PREFLIGHT=${SKIP_PREFLIGHT:-false}
+WORKING_DIR=/opt/openstack_deploy/osa-warp

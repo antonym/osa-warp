@@ -23,8 +23,8 @@ discover_code_version
 require_ubuntu_version 16
 
 # create working directory if it doesn't exist
-if [ ! -d /etc/openstack_deploy/osa-warp ]; then
-  mkdir -p /etc/openstack_deploy/osa-warp
+if [ ! -d ${WORKING_DIR} ]; then
+  mkdir -p ${WORKING_DIR}
 fi
 
 # if target not set, exit and inform user how to proceed
@@ -78,10 +78,13 @@ power_down
 # run configuration and database migrations
 for RELEASE_TO_DO in ${TODO}; do
   if [[ ${RELEASE_TO_DO} != ${TARGET} ]]; then
-    checkout_release ${RELEASE_TO_DO}
-    bootstrap_ansible
-    config_migration ${RELEASE_TO_DO}
-    if [ ! -f /etc/openstack_deploy/osa-warp/${RELEASE_TO_DO}_migrate.complete ]; then
+    if [ ! -f ${WORKING_DIR}/${RELEASE_TO_DO}_config.complete ]; then
+      checkout_release ${RELEASE_TO_DO}
+      bootstrap_ansible
+      config_migration ${RELEASE_TO_DO}
+      touch ${WORKING_DIR}/${RELEASE_TO_DO}_config.complete
+    fi
+    if [ ! -f ${WORKING_DIR}/${RELEASE_TO_DO}_migrate.complete ]; then
       pushd /opt/osa-warp/playbooks
         openstack-ansible remove-apt-proxy.yml
         openstack-ansible db-migration-${RELEASE_TO_DO}.yml
@@ -91,12 +94,15 @@ for RELEASE_TO_DO in ${TODO}; do
 done
 
 # run target upgrade
-pushd /opt/openstack-ansible
-  checkout_release ${TARGET}
-  bootstrap_ansible
-  regen_repo_containers
-  run_upgrade
-popd
+if [ ! -f ${WORKING_DIR}/${TARGET}-upgrade.complete ]; then
+  pushd /opt/openstack-ansible
+    checkout_release ${TARGET}
+    bootstrap_ansible
+    regen_repo_containers
+    run_upgrade
+    touch ${WORKING_DIR}/${TARGET}-upgrade.complete
+  popd
+fi
 
 # run cleanup
 for RELEASE_TO_DO in ${TODO}; do
