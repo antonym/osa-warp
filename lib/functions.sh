@@ -137,14 +137,12 @@ function checkout_release {
     git clone --recursive https://github.com/openstack/openstack-ansible /opt/openstack-ansible
     pushd /opt/openstack-ansible
       git checkout stable/"${1}"
-      scripts/bootstrap-ansible.sh
     popd
   else
     pushd /opt/openstack-ansible
       git reset --hard HEAD
       git fetch --all
       git checkout stable/"${1}"
-      scripts/bootstrap-ansible.sh
     popd
   fi
 }
