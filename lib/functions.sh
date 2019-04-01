@@ -120,38 +120,10 @@ function configure_osa {
   fi
 }
 
-function set_keystone_flush_memcache {
-  if [[ ! -f /etc/openstack_deploy/user_rpco_upgrade.yml ]]; then
-     echo "---" > /etc/openstack_deploy/user_rpco_upgrade.yml
-     echo "keystone_flush_memcache: yes" >> /etc/openstack_deploy/user_rpco_upgrade.yml
-  elif [[ -f /etc/openstack_deploy/user_rpco_upgrade.yml ]]; then
-    if ! grep -i "keystone_flush_memcache" /etc/openstack_deploy/user_rpco_upgrade.yml; then
-      echo "keystone_flush_memcache: yes" >> /etc/openstack_deploy/user_rpco_upgrade.yml
-    fi
-  fi
-}
-
-function disable_hardening {
-  if [[ ! -f /etc/openstack_deploy/user_rpco_upgrade.yml ]]; then
-     echo "---" > /etc/openstack_deploy/user_rpco_upgrade.yml
-     echo "apply_security_hardening: false" >> /etc/openstack_deploy/user_rpco_upgrade.yml
-  elif [[ -f /etc/openstack_deploy/user_rpco_upgrade.yml ]]; then
-    if ! grep -i "apply_security_hardening" /etc/openstack_deploy/user_rpco_upgrade.yml; then
-      echo "apply_security_hardening: false" >> /etc/openstack_deploy/user_rpco_upgrade.yml
-    fi
-  fi
-}
-
-function set_secrets_file {
-  if [ -f "/etc/openstack_deploy/user_secrets.yml" ]; then
-    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_osa_warp.yml; then
-      echo 'osa_secrets_file_name: "user_secrets.yml"' >> /etc/openstack_deploy/user_osa_warp.yml
-    fi
-  elif [ -f "/etc/openstack_deploy/user_osa_secrets.yml" ]; then
-    if ! grep "^osa_secrets_file_name" /etc/openstack_deploy/user_osa_warp.yml; then
-      echo 'osa_secrets_file_name: "user_osa_secrets.yml"' >> /etc/openstack_deploy/user_osa_warp.yml
-    fi
-  fi
+function osa_warp_configs {
+  pushd /opt/osa-warp/playbooks
+    openstack-ansible osa-warp-configs.yml
+  popd
 }
 
 function power_down {

@@ -40,10 +40,6 @@ TARGET=${1,,}
 if [[ ${TARGET} == ${CODE_UPGRADE_FROM} ]]; then
   echo "Nothing to do, you're already upgraded to ${TARGET^}."
   exit 99
-elif [[ ${TARGET} == "ocata" ]]; then
-  echo "Upgrade directly to Ocata is not supported."
-  echo "Pike would be the next supported upgrade target."
-  exit 99
 fi
 
 # iterate RELEASES and generate TODO list based on target set
@@ -68,11 +64,13 @@ if ! echo ${TODO} | grep -w ${TARGET} > /dev/null; then
 fi
 
 check_user_variables
-set_secrets_file
 
 if [ "${SKIP_PREFLIGHT}" != "true" ]; then
   pre_flight
 fi
+
+# generate osa-warp-configs
+osa_warp_configs
 
 # shut down containers
 power_down
