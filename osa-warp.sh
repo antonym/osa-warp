@@ -109,36 +109,3 @@ checkout_release ${TARGET}
 pushd /opt/openstack-ansible/playbooks
   openstack-ansible haproxy-install.yml --tags=haproxy_server-config
 popd
-
-# run through TODO list and run all migrations
-#for RELEASE_TO_DO in ${TODO}; do
-#  echo "Starting leap upgrade to ${TARGET^}"
-#  bash ubuntu16-upgrade-to-${TARGET}.sh
-#done
-
-# this is not final, testing orchestration before making a loop
-# based on user input
-
-#### ocata leap ####
-
-#pushd /opt/openstack-ansible
-#  git checkout stable/ocata
-#popd
-
-#pushd /opt/openstack-ansible/scripts/upgrade-utilities/playbooks
-#  openstack-ansible ansible_fact_cleanup.yml
-#  openstack-ansible deploy-config-changes.yml
-#  openstack-ansible user-secrets-adjustment.yml
-#  openstack-ansible pip-conf-removal.yml
-#popd
-
-#pushd /opt/rpc-upgrades/incremental/playbooks
-#  openstack-ansible db-migration-ocata.yml
-#popd
-
-#### pike leap ####
-
-## potentially move all neutron interactions to end after all other migrations
-## power down neutron here and migrate for o/p/q to maximize network uptime
-## to leave things available while rest of control plane is shutdown
-
