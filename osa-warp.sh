@@ -79,6 +79,7 @@ power_down
 for RELEASE_TO_DO in ${TODO}; do
   if [[ ${RELEASE_TO_DO} != ${TARGET} ]]; then
     checkout_release ${RELEASE_TO_DO}
+    bootstrap_ansible
     config_migration ${RELEASE_TO_DO}
     if [ ! -f /etc/openstack_deploy/osa-warp/${RELEASE_TO_DO}_migrate.complete ]; then
       pushd /opt/osa-warp/playbooks
@@ -92,6 +93,7 @@ done
 # run target upgrade
 pushd /opt/openstack-ansible
   checkout_release ${TARGET}
+  bootstrap_ansible
   regen_repo_containers
   run_upgrade
 popd
