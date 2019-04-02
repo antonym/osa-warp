@@ -69,6 +69,8 @@ if [ "${SKIP_PREFLIGHT}" != "true" ]; then
   pre_flight
 fi
 
+mark_started
+
 # generate osa-warp-configs
 osa_warp_configs
 
@@ -117,3 +119,5 @@ checkout_release ${TARGET}
 pushd /opt/openstack-ansible/playbooks
   openstack-ansible haproxy-install.yml --tags=haproxy_server-config
 popd
+
+mark_completed

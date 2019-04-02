@@ -18,40 +18,47 @@
 
 function discover_code_version {
   if [[ ! -f "/etc/openstack-release" ]]; then
-      failure "No release file could be found, failing..."
-      exit 99
+    failure "No release file could be found, failing..."
+    exit 99
+  elif [[ -f "${WORKING_DIR}/openstack-release.upgrade" ]]; then
+    source ${WORKING_DIR}/openstack-release.upgrade
+    determine_release
   else
-      source /etc/openstack-release
-      case "${DISTRIB_RELEASE%%.*}" in
-        *14|newton-eol)
-          export CODE_UPGRADE_FROM="newton"
-          echo "You seem to be running Newton"
-        ;;
-        *15|ocata)
-           export CODE_UPGRADE_FROM="ocata"
-           echo "You seem to be running Ocata"
-          ;;
-        *16|pike)
-           export CODE_UPGRADE_FROM="pike"
-           echo "You seem to be running Pike"
-        ;;
-        *17|queens)
-           export CODE_UPGRADE_FROM="queens"
-           echo "You seem to be running Queens"
-        ;;
-        *18|rocky)
-           export CODE_UPGRADE_FROM="rocky"
-           echo "You seem to be running Rocky"
-        ;;
-        *19|stein)
-           export CODE_UPGRADE_FROM="stein"
-           echo "You seem to be running Stein"
-        ;;
-        *)
-           echo "Unable to detect current OpenStack version, failing...."
-           exit 99
-        esac
-    fi
+    source /etc/openstack-release
+    determine_release
+  fi
+}
+
+function determine_release {
+  case "${DISTRIB_RELEASE%%.*}" in
+    *14|newton-eol)
+      export CODE_UPGRADE_FROM="newton"
+      echo "You seem to be running Newton"
+    ;;
+    *15|ocata)
+      export CODE_UPGRADE_FROM="ocata"
+      echo "You seem to be running Ocata"
+    ;;
+    *16|pike)
+      export CODE_UPGRADE_FROM="pike"
+      echo "You seem to be running Pike"
+    ;;
+    *17|queens)
+      export CODE_UPGRADE_FROM="queens"
+      echo "You seem to be running Queens"
+    ;;
+    *18|rocky)
+      export CODE_UPGRADE_FROM="rocky"
+      echo "You seem to be running Rocky"
+    ;;
+    *19|stein)
+      export CODE_UPGRADE_FROM="stein"
+      echo "You seem to be running Stein"
+    ;;
+    *)
+      echo "Unable to detect current OpenStack version, failing...."
+      exit 99
+    esac
 }
 
 # Fail if Ubuntu Major release is not the minimum required for a given OpenStack upgrade
@@ -236,3 +243,18 @@ function cleanup {
     ;;
   esac
 }
+
+function mark_started {
+  echo "Starting ${TARGET^} upgrade..."
+  ensure_working_dir
+  if [ ! -f ${WORKING_DIR}/upgrade-to-${TARGET}.started ]; then
+    cp /etc/openstack-release ${WORKING_DIR}/openstack-release.upgrade
+  fi
+  touch ${WORKING_DIR}/upgrade-to-${TARGET}.started
+}
+
+function mark_completed {
+  echo "Completing ${TARGET^} upgrade..."
+  touch ${WORKING_DIR}/upgrade-to-${TARGET}.complete
+}
+
