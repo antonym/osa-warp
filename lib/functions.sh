@@ -203,6 +203,7 @@ function regen_repo_containers {
   pushd /opt/openstack-ansible/playbooks
     openstack-ansible lxc-containers-destroy.yml -e force_containers_destroy=true -e force_containers_data_destroy=true --limit repo_container
     openstack-ansible lxc-containers-create.yml --limit repo-infra_all -e lxc_container_fs_size=10G
+    touch ${WORKING_DIR}/${TARGET}-repo-regen.complete
   popd
 }
 
@@ -246,7 +247,6 @@ function cleanup {
 
 function mark_started {
   echo "Starting ${TARGET^} upgrade..."
-  ensure_working_dir
   if [ ! -f ${WORKING_DIR}/upgrade-to-${TARGET}.started ]; then
     cp /etc/openstack-release ${WORKING_DIR}/openstack-release.upgrade
   fi

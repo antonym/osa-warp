@@ -100,7 +100,9 @@ if [ ! -f ${WORKING_DIR}/${TARGET}-upgrade.complete ]; then
   pushd /opt/openstack-ansible
     checkout_release ${TARGET}
     bootstrap_ansible
-    regen_repo_containers
+    if [ ! -f ${WORKING_DIR}/${TARGET}-repo-regen.complete ]; then
+      regen_repo_containers
+    fi
     run_upgrade
     touch ${WORKING_DIR}/${TARGET}-upgrade.complete
   popd
