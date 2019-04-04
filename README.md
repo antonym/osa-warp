@@ -27,6 +27,7 @@ Pike, Queens to Rocky on Ubuntu 16.04
 
     git clone https://github.com/antonym/osa-warp.git /opt/osa-warp
     cd /opt/osa-warp
+    # valid jumps (releases) are currently ocata, pike, queens, rocky
     ./osa-warp.sh <target_release>
 
 TODO:
