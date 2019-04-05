@@ -112,7 +112,7 @@ fi
 for RELEASE_TO_DO in ${TODO}; do
   if [[ ${RELEASE_TO_DO} != ${TARGET} ]]; then
     checkout_release ${RELEASE_TO_DO}
-    cleanup
+    cleanup ${RELEASE_TO_DO}
   fi
 done
 

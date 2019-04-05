@@ -23,7 +23,8 @@ Stages:
 * Cloud is then upgraded to target release.
 
 Currently supports warping more than one release across Newton, Ocata, 
-Pike, Queens to Rocky on Ubuntu 16.04
+Pike, Queens to Rocky on Ubuntu 16.04.  Must be at a Newton or greater
+starting point running Ubuntu 16.04.
 
     git clone https://github.com/antonym/osa-warp.git /opt/osa-warp
     cd /opt/osa-warp
@@ -35,7 +36,5 @@ TODO:
 * Generate venvs for each latest stable release to use for migrations (or find
   a place where they are currently hosted with OpenStack to move away from
   using rpco-repo.
-* Use latest releases versions instead of stable/branch so that it uses proper
-  releases and potentially add the option to jump to a particuar release version.
 * Add future release support
 * Squashing whatever bugs may be present... surely none of those exist...

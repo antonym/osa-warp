@@ -140,17 +140,19 @@ function power_down {
 }
 
 function checkout_release {
+  export STABLE_RELEASE=${1^^}_RELEASE
+
   if [ ! -d "/opt/openstack-ansible" ]; then
     git clone --recursive ${OSA_REPO} /opt/openstack-ansible
     pushd /opt/openstack-ansible
-      git checkout stable/"${1}"
+      git checkout "${!STABLE_RELEASE}"
     popd
   else
     pushd /opt/openstack-ansible
       git remote set-url origin ${OSA_REPO}
       git reset --hard HEAD
       git fetch --all
-      git checkout stable/"${1}"
+      git checkout "${!STABLE_RELEASE}"
     popd
   fi
 }
