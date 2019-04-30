@@ -38,3 +38,23 @@ TODO:
   using rpco-repo.
 * Add future release support
 * Squashing whatever bugs may be present... surely none of those exist...
+
+Generating venvs to be used for migrations
+
+```
+# create an AIO and partially install to get venvs
+export OSA_TAG=18.1.6
+git clone --branch ${OSA_TAG} https://github.com/openstack/openstack-ansible.git /opt/openstack-ansible
+cd /opt/openstack-ansible
+scripts/bootstrap-ansible.sh
+scripts/bootstrap-aio.sh
+# copy aio files into place so all available venvs are built
+cp /opt/openstack-ansible/etc/openstack_deploy/conf.d/*.yml.aio /etc/openstack_deploy/conf.d/
+for f in $(ls -1 /etc/openstack_deploy/conf.d/*.aio); do mv -v ${f} ${f%.*}; done
+openstack-ansible setup-hosts.yml
+openstack-ansible setup-infrastructure.yml
+# retrieve venvs from repo container
+lxc-attach --name `lxc-ls repo_container` ls -la /var/www/repo/venvs/$OSA_TAG
+```
+
+
