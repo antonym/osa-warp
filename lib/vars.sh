@@ -26,7 +26,8 @@ RELEASES="newton
           ocata
           pike
           queens
-          rocky"
+          rocky
+          stein"
 
 STARTING_RELEASE=false
 SKIP_PREFLIGHT=${SKIP_PREFLIGHT:-false}
