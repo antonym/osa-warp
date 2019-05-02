@@ -190,6 +190,9 @@ function config_migration {
         openstack-ansible pip-conf-removal.yml
         openstack-ansible ceph-galaxy-removal.yml
       popd
+      pushd /opt/osa-warp/playbooks
+        openstack-ansible ensure-dbus-installed.yml
+      popd
     ;;
     rocky)
       # run rocky configs
