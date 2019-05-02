@@ -167,6 +167,7 @@ function main {
     "${SCRIPTS_PATH}/bootstrap-ansible.sh"
 
     pushd ${MAIN_PATH}/playbooks
+        RUN_TASKS+=("/opt/osa-warp/playbooks/remove-pip-conf.yml")
         RUN_TASKS+=("${SCRIPTS_PATH}/upgrade-utilities/deploy-config-changes.yml")
         # we don't want to trigger container restarts for these groups yet
         RUN_TASKS+=("setup-hosts.yml --limit '!galera_all:!rabbitmq_all'")
