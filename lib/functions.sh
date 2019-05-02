@@ -190,9 +190,6 @@ function config_migration {
         openstack-ansible pip-conf-removal.yml
         openstack-ansible ceph-galaxy-removal.yml
       popd
-      pushd /opt/osa-warp/playbooks
-        openstack-ansible ensure-dbus-installed.yml
-      popd
     ;;
     rocky)
       # run rocky configs
@@ -219,6 +216,10 @@ function run_upgrade {
     export I_REALLY_KNOW_WHAT_I_AM_DOING=true
     export SETUP_ARA=true
     export ANSIBLE_CALLBACK_PLUGINS=/etc/ansible/roles/plugins/callback:/opt/ansible-runtime/local/lib/python2.7/site-packages/ara/plugins/callbacks
+    # remove lxc-cache to ensure we have a new container build
+    pushd /opt/osa-warp/playbooks
+      openstack-ansible remove-lxc-cache.yml
+    popd
     echo "YES" | bash scripts/run-upgrade.sh
   popd
 }

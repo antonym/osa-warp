@@ -13,12 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: Ensure packages present
-  hosts: all
+- name: Remove lxc caches from lxc_hosts
+  hosts: lxc_hosts
   gather_facts: false
   ignore_errors: true
   tasks:
-    - name: Ensure dbus present
-      package:
-        name: dbus
-        state: present
+    - name: Remove lxc caches to force a cache rebuild
+      command: "machinectl remove {{ item }}"
+      with_items:
+        - ubuntu-bionic-amd64
+        - ubuntu-xenial-amd64
+        - ubuntu-trusty-amd64
