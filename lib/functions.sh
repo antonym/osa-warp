@@ -209,6 +209,15 @@ function regen_repo_containers {
   popd
 }
 
+function upgrade_prep {
+  pushd /opt/osa-warp/playbooks
+    openstack-ansible ensure-dbus-present.yml
+    openstack-ansible remove-apt-proxy.yml
+    openstack-ansible remove-pip-conf.yml
+    openstack-ansible remove-lxc-cache.yml
+  popd
+}
+
 function run_upgrade {
   pushd /opt/openstack-ansible
     cp /opt/osa-warp/releases/${TARGET}/run-upgrade.sh /opt/openstack-ansible/scripts/run-upgrade.sh
@@ -216,10 +225,6 @@ function run_upgrade {
     export I_REALLY_KNOW_WHAT_I_AM_DOING=true
     export SETUP_ARA=true
     export ANSIBLE_CALLBACK_PLUGINS=/etc/ansible/roles/plugins/callback:/opt/ansible-runtime/local/lib/python2.7/site-packages/ara/plugins/callbacks
-    # remove lxc-cache to ensure we have a new container build
-    pushd /opt/osa-warp/playbooks
-      openstack-ansible remove-lxc-cache.yml
-    popd
     echo "YES" | bash scripts/run-upgrade.sh
   popd
 }

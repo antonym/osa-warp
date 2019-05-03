@@ -88,7 +88,6 @@ for RELEASE_TO_DO in ${TODO}; do
     fi
     if [ ! -f ${WORKING_DIR}/${RELEASE_TO_DO}_migrate.complete ]; then
       pushd /opt/osa-warp/playbooks
-        openstack-ansible remove-apt-proxy.yml
         openstack-ansible db-migration-${RELEASE_TO_DO}.yml
       popd
     fi
@@ -100,6 +99,7 @@ if [ ! -f ${WORKING_DIR}/${TARGET}-upgrade.complete ]; then
   pushd /opt/openstack-ansible
     checkout_release ${TARGET}
     bootstrap_ansible
+    upgrade_prep
     #if [ ! -f ${WORKING_DIR}/${TARGET}-repo-regen.complete ]; then
     #  regen_repo_containers
     #fi
